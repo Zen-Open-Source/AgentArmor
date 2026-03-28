@@ -1,0 +1,27 @@
+{
+  "name": "agent-armor",
+  "version": "0.1.0",
+  "description": "Security scanner for AI agents",
+  "type": "module",
+  "bin": {
+    "agent-armor": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "json5": "^2.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
