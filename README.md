@@ -4,12 +4,24 @@ Security scanner for AI agents. Scans your agent installation, checks it against
 
 Currently supports **OpenClaw**. Pluggable architecture makes it easy to add more agent types.
 
-## Quick Start
+Built in Rust — ships as a single self-contained binary. No runtime required.
 
+## Installation
+
+**From source:**
 ```bash
-npm install
-npm run build
-node dist/index.js scan
+cargo build --release
+cp target/release/agent-armor /usr/local/bin/
+```
+
+**Via cargo:**
+```bash
+cargo install agent-armor
+```
+
+**Homebrew** (coming soon):
+```bash
+brew install agent-armor
 ```
 
 ## Usage
@@ -48,13 +60,14 @@ AgentArmor runs 30 security checks across 14 categories, all derived from the [O
 | mDNS/Discovery | 2 | mDNS set to minimal or off |
 | Control UI | 2 | Origin allowlist configured, device auth enabled |
 | Plugins | 2 | Explicit plugin allowlist configured |
+| Secrets Management | 12 | secrets.json permissions, auth profile permissions, no hardcoded passwords, no plaintext API keys, secrets not in agent workspace |
 
 ## Scoring
 
-Each check has a severity level (critical, high, medium, low) and a point value. Your total score is the sum of earned points out of 100.
+Each check has a severity level (critical, high, medium, low) and a point value. Your score is normalized to 100 regardless of how many checks are active.
 
-- **80-100**: Well hardened
-- **60-79**: Needs attention
+- **80–100**: Well hardened
+- **60–79**: Needs attention
 - **Below 60**: Significant risks
 
 ## Example Output
@@ -63,7 +76,7 @@ Each check has a severity level (critical, high, medium, low) and a point value.
   AgentArmor Security Scan — OpenClaw
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  Score: 72/100
+  Score: 72/100 (81/112 pts)
 
   Authentication                     8/12
     ✓ Gateway auth enabled                 4/4
@@ -72,15 +85,13 @@ Each check has a severity level (critical, high, medium, low) and a point value.
       Token length: 13 chars (minimum 32 recommended)
       Fix: Generate a strong token: openclaw doctor --generate-gateway-token
 
-  File Permissions                   10/10
-    ✓ ~/.openclaw directory permissions    4/4
-    ✓ Config file permissions              3/3
-    ✓ Credential file permissions          3/3
-
-  ...
-
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  1 critical, 0 failed, 3 warnings
+  Secrets Management                 9/12
+    ✓ secrets.json permissions             2/2
+    ✓ Auth profile file permissions        2/2
+    ✓ Password not hardcoded in config     3/3
+    ✓ No plaintext secrets in config       3/3
+    ⚠ Secrets not in agent workspace       0/2
+      ...
 ```
 
 ## Exit Codes
@@ -93,34 +104,26 @@ Each check has a severity level (critical, high, medium, low) and a point value.
 
 ## Adding a New Agent
 
-Create a new directory under `src/agents/<name>/` and implement the `AgentPlugin` interface:
+Create a new module under `src/agents/<name>/` and implement the `AgentPlugin` trait:
 
-```typescript
-interface AgentPlugin {
-  name: string;
-  displayName: string;
-  detect(): Promise<boolean>;
-  scan(): Promise<CheckResult[]>;
+```rust
+pub trait AgentPlugin {
+    fn name(&self) -> &'static str;
+    fn display_name(&self) -> &'static str;
+    fn detect(&self) -> bool;
+    fn scan(&self) -> anyhow::Result<Vec<CheckResult>>;
 }
 ```
 
-Then register it in `src/agents/index.ts`. See `src/agents/openclaw/` for a complete example.
+Then register it in `src/agents/mod.rs`. See `src/agents/openclaw/` for a complete example.
 
-## Tech Stack
+## Building
 
-- TypeScript (strict mode)
-- Node.js 18+
-- [commander](https://github.com/tj/commander.js) — CLI framework
-- [chalk](https://github.com/chalk/chalk) — Terminal colors
-- [json5](https://github.com/json5/json5) — Parse OpenClaw config (supports comments/trailing commas)
-- [tsup](https://github.com/egoist/tsup) — Bundler
-
-## Development
+Requires Rust 1.70+.
 
 ```bash
-npm install
-npm run dev    # Watch mode
-npm run build  # Production build
+cargo build            # Debug build
+cargo build --release  # Optimized release build (stripped, LTO enabled)
 ```
 
 ## License
