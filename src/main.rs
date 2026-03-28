@@ -1,7 +1,10 @@
 mod agents;
+mod fixer;
 mod scanner;
 mod types;
 mod utils;
+
+use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 use utils::report::{format_json, format_report};
@@ -28,6 +31,29 @@ enum Commands {
         /// Show all checks including passing ones
         #[arg(long)]
         verbose: bool,
+    },
+
+    /// Auto-remediate security issues found by scan
+    Fix {
+        /// Agent type (default: auto-detect)
+        #[arg(long)]
+        agent: Option<String>,
+
+        /// Show what would change without modifying anything
+        #[arg(long)]
+        dry_run: bool,
+
+        /// Prompt before each fix [Y/n]
+        #[arg(long)]
+        interactive: bool,
+
+        /// Show detailed output
+        #[arg(long)]
+        verbose: bool,
+
+        /// Custom backup directory (default: ~/.agent-armor/backups/)
+        #[arg(long)]
+        backup_dir: Option<PathBuf>,
     },
 }
 
@@ -61,6 +87,25 @@ fn main() {
                     eprintln!("Error: {}", e);
                     std::process::exit(2);
                 }
+            }
+        }
+        Commands::Fix {
+            agent,
+            dry_run,
+            interactive,
+            verbose,
+            backup_dir,
+        } => {
+            let opts = fixer::FixOptions {
+                agent,
+                dry_run,
+                interactive,
+                verbose,
+                backup_dir,
+            };
+            if let Err(e) = fixer::run_fix(opts) {
+                eprintln!("Error: {}", e);
+                std::process::exit(2);
             }
         }
     }
