@@ -1,6 +1,7 @@
 mod auth;
 mod browser_security;
 mod control_ui;
+mod cve;
 mod dangerous_flags;
 mod dm_security;
 mod exec_security;
@@ -42,4 +43,5 @@ pub const ALL_CHECKS: &[CheckFn] = &[
     prompt_injection::check,
     reverse_proxy::check,
     secrets::check,
+    cve::check,
 ];
