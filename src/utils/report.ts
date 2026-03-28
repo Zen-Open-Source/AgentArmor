@@ -43,9 +43,10 @@ export function formatReport(report: ScanReport, verbose: boolean): string {
   lines.push(`  ${chalk.dim(bar)}`);
   lines.push("");
 
+  const normalized = Math.round((report.score / report.maxScore) * 100);
   const colorFn = scoreColor(report.score, report.maxScore);
   lines.push(
-    `  Score: ${colorFn(chalk.bold(`${report.score}/${report.maxScore}`))}`
+    `  Score: ${colorFn(chalk.bold(`${normalized}/100`))} ${chalk.dim(`(${report.score}/${report.maxScore} pts)`)}`
   );
   lines.push("");
 
@@ -104,5 +105,6 @@ export function formatReport(report: ScanReport, verbose: boolean): string {
 }
 
 export function formatJson(report: ScanReport): string {
-  return JSON.stringify(report, null, 2);
+  const normalized = Math.round((report.score / report.maxScore) * 100);
+  return JSON.stringify({ ...report, normalizedScore: normalized }, null, 2);
 }

@@ -16,6 +16,7 @@ import { checkPlugins } from "./plugins-security.js";
 import { checkSubAgents } from "./sub-agents.js";
 import { checkPromptInjection } from "./prompt-injection.js";
 import { checkReverseProxy } from "./reverse-proxy.js";
+import { checkSecretsManagement } from "./secrets-management.js";
 
 export const allChecks: CheckFn[] = [
   checkAuth,
@@ -35,4 +36,5 @@ export const allChecks: CheckFn[] = [
   checkSubAgents,
   checkPromptInjection,
   checkReverseProxy,
+  checkSecretsManagement,
 ];
