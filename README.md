@@ -26,6 +26,8 @@ brew install agent-armor
 
 ## Usage
 
+[How to check your OpenClaw setup with AgentArmor](https://www.zenopensource.org/guides/agentarmor) walks through a local scan, a file-permissions finding, and the second scan that verifies the fix.
+
 ```bash
 # Auto-detect installed agent and scan
 agent-armor scan
